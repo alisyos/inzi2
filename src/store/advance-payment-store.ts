@@ -283,18 +283,28 @@ export const useAdvancePaymentStore = create<AdvancePaymentStore>((set, get) => 
       
       if (result.errors.length > 0) {
         console.warn('CSV 로드 중 오류:', result.errors);
+        // 에러가 있어도 파싱된 데이터는 표시
+        if (result.data.length > 0) {
+          set({ 
+            error: `일부 데이터 파싱 오류 (${result.errors.length}건). ${result.parsedRows}/${result.totalRows}행 로드됨` 
+          });
+        }
       }
       
       console.log(`CSV 로드 완료: ${result.parsedRows}/${result.totalRows} 행 처리됨`);
       
-      get().setPayments(result.data);
-      set({ loading: false });
+      if (result.data.length > 0) {
+        get().setPayments(result.data);
+        set({ loading: false });
+      } else {
+        throw new Error('파싱된 데이터가 없습니다');
+      }
       
     } catch (error) {
       console.error('CSV 파일 로드 실패:', error);
       set({ 
         loading: false, 
-        error: 'CSV 파일을 불러오는데 실패했습니다.' 
+        error: `CSV 파일 로드 오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}` 
       });
       
       // 오류 발생시 샘플 데이터라도 표시

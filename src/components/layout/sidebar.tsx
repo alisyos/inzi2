@@ -7,7 +7,7 @@ export function Sidebar() {
         {/* 로고 영역 */}
         <div className="mb-6">
           <Link href="/" className="text-xl font-bold text-gray-900">
-            지피티코리아
+            인지컨트롤스
           </Link>
         </div>
 
@@ -20,24 +20,6 @@ export function Sidebar() {
             Home
           </Link>
           <Link 
-            href="/page1" 
-            className="flex items-center py-2 px-3 text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-md transition-colors"
-          >
-            Page1
-          </Link>
-          <Link 
-            href="/page2" 
-            className="flex items-center py-2 px-3 text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-md transition-colors"
-          >
-            Page2
-          </Link>
-          <Link 
-            href="/page3" 
-            className="flex items-center py-2 px-3 text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-md transition-colors"
-          >
-            Page3
-          </Link>
-          <Link 
             href="/advance-payments" 
             className="flex items-center py-2 px-3 text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-md transition-colors font-medium"
           >
@@ -48,6 +30,12 @@ export function Sidebar() {
             className="flex items-center py-2 px-3 text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-md transition-colors font-medium"
           >
             프로젝트별 분석
+          </Link>
+          <Link 
+            href="/manager-analysis" 
+            className="flex items-center py-2 px-3 text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-md transition-colors font-medium"
+          >
+            담당자별 분석
           </Link>
         </nav>
       </div>

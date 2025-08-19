@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useProjectAnalysisStore } from '@/store/project-analysis-store';
+import { useManagerAnalysisStore } from '@/store/manager-analysis-store';
 import { useAdvancePaymentStore } from '@/store/advance-payment-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +9,7 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@
 import { Card } from '@/components/ui/card';
 import { Table } from '@/components/ui/table';
 
-export default function ProjectAnalysisPage() {
+export default function ManagerAnalysisPage() {
   const {
     departmentSummaries,
     filteredSummaries,
@@ -21,7 +21,7 @@ export default function ProjectAnalysisPage() {
     setFilters,
     clearFilters,
     exportToCSV,
-  } = useProjectAnalysisStore();
+  } = useManagerAnalysisStore();
   
   // advance-payment-store에서 CSV 로드 함수 가져오기
   const { loadCSVFromFile, payments } = useAdvancePaymentStore();
@@ -68,6 +68,16 @@ export default function ProjectAnalysisPage() {
 
   // 부서 목록 가져오기
   const departmentList = [...new Set(departmentSummaries.map(dept => dept.department))];
+  
+  // 모든 담당자 목록 가져오기
+  const managerList = [...new Set(departmentSummaries.flatMap(dept => 
+    dept.managers.map(m => m.collectionManager)
+  ))].sort();
+
+  // 정산 진행 상황 목록
+  const settlementStatusList = [...new Set(departmentSummaries.flatMap(dept => 
+    dept.managers.map(m => m.settlementProgress)
+  ))].sort();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -76,8 +86,8 @@ export default function ProjectAnalysisPage() {
         <div className="mb-6">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-1">프로젝트별 분석</h1>
-              <p className="text-gray-600">부서별 선수금/선급금 현황을 프로젝트 단위로 분석합니다.</p>
+              <h1 className="text-2xl font-bold text-gray-900 mb-1">담당자별 분석</h1>
+              <p className="text-gray-600">부서별 담당자의 선수금/선급금 현황을 분석합니다.</p>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={generateAnalysis} disabled={loading}>
@@ -105,9 +115,9 @@ export default function ProjectAnalysisPage() {
           </Card>
           <Card className="p-4">
             <div className="text-xl font-bold text-gray-900">
-              {loading ? '로딩 중...' : stats.totalProjects}
+              {loading ? '로딩 중...' : stats.totalManagers}
             </div>
-            <div className="text-sm text-gray-600">총 프로젝트 수</div>
+            <div className="text-sm text-gray-600">총 담당자 수</div>
           </Card>
           <Card className="p-4">
             <div className="text-xl font-bold text-green-600">
@@ -134,7 +144,7 @@ export default function ProjectAnalysisPage() {
           <div className="flex flex-wrap gap-4 items-center justify-between">
             <div className="flex flex-wrap gap-4">
               <Input
-                placeholder="프로젝트, 금형마스터 검색..."
+                placeholder="담당자명 검색..."
                 value={filters.searchTerm || ''}
                 onChange={(e) => setFilters({ searchTerm: e.target.value })}
                 className="w-64"
@@ -154,32 +164,31 @@ export default function ProjectAnalysisPage() {
                 </SelectContent>
               </Select>
               <Select
-                value={filters.paymentStatus || 'all'}
-                onValueChange={(value) => setFilters({ paymentStatus: value === 'all' ? undefined : value })}
+                value={filters.collectionManager || 'all'}
+                onValueChange={(value) => setFilters({ collectionManager: value === 'all' ? undefined : value })}
               >
                 <SelectTrigger className="w-40">
-                  <SelectValue placeholder="지급 상태" />
+                  <SelectValue placeholder="담당자 선택" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">모든 상태</SelectItem>
-                  <SelectItem value="지급완료">지급완료</SelectItem>
-                  <SelectItem value="일시보류">일시보류</SelectItem>
-                  <SelectItem value="정산완료">정산완료</SelectItem>
-                  <SelectItem value="선수금">선수금</SelectItem>
-                  <SelectItem value="일시불지급">일시불지급</SelectItem>
+                  <SelectItem value="all">모든 담당자</SelectItem>
+                  {managerList.map(manager => (
+                    <SelectItem key={manager} value={manager}>{manager}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <Select
-                value={filters.currency || 'all'}
-                onValueChange={(value) => setFilters({ currency: value === 'all' ? undefined : value })}
+                value={filters.settlementProgress || 'all'}
+                onValueChange={(value) => setFilters({ settlementProgress: value === 'all' ? undefined : value })}
               >
-                <SelectTrigger className="w-32">
-                  <SelectValue placeholder="통화" />
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="정산 상황" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">모든 통화</SelectItem>
-                  <SelectItem value="KRW">KRW</SelectItem>
-                  <SelectItem value="USD">USD</SelectItem>
+                  <SelectItem value="all">모든 상황</SelectItem>
+                  {settlementStatusList.map(status => (
+                    <SelectItem key={status} value={status}>{status}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <Button variant="outline" onClick={clearFilters}>
@@ -220,7 +229,7 @@ export default function ProjectAnalysisPage() {
                         {expandedDepartments.has(dept.department) ? '▼' : '▶'} {dept.department}
                       </span>
                       <span className="text-sm text-gray-500">
-                        ({dept.projectCount}개 프로젝트, {dept.itemCount}건)
+                        ({dept.managerCount}명 담당자, {dept.itemCount}건)
                       </span>
                     </div>
                     <div className="flex gap-6 text-sm">
@@ -242,64 +251,46 @@ export default function ProjectAnalysisPage() {
                     <Table>
                       <thead>
                         <tr className="border-b bg-white">
-                          <th className="p-3 text-left font-semibold text-sm">금형마스터</th>
-                          <th className="p-3 text-left font-semibold text-sm">프로젝트 내역</th>
+                          <th className="p-3 text-left font-semibold text-sm">부서</th>
+                          <th className="p-3 text-left font-semibold text-sm">회수담당</th>
                           <th className="p-3 text-left font-semibold text-sm">정산진행현황</th>
-                          <th className="p-3 text-left font-semibold text-sm">대금지급</th>
                           <th className="p-3 text-right font-semibold text-sm">선급금</th>
                           <th className="p-3 text-right font-semibold text-sm">선수금</th>
                           <th className="p-3 text-right font-semibold text-sm">합계</th>
-                          <th className="p-3 text-center font-semibold text-sm">통화</th>
                           <th className="p-3 text-center font-semibold text-sm">항목수</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {dept.projects.map((project, index) => (
-                          <tr key={`${project.moldMaster}-${index}`} className="border-b hover:bg-gray-50">
-                            <td className="p-3 font-mono text-sm">{project.moldMaster}</td>
-                            <td className="p-3 text-sm max-w-xs truncate" title={project.moldMasterDetails}>
-                              {project.moldMasterDetails}
-                            </td>
+                        {dept.managers.map((manager, index) => (
+                          <tr key={`${manager.collectionManager}-${index}`} className="border-b hover:bg-gray-50">
+                            <td className="p-3 text-sm">{manager.department}</td>
+                            <td className="p-3 font-medium text-sm">{manager.collectionManager}</td>
                             <td className="p-3">
                               <span className={`px-2 py-1 text-xs rounded-full ${
-                                project.settlementProgress === '정산완료' 
+                                manager.settlementProgress === '정산완료' 
                                   ? 'bg-green-100 text-green-800'
-                                  : project.settlementProgress === '정산가능'
+                                  : manager.settlementProgress === '정산가능'
                                   ? 'bg-yellow-100 text-yellow-800'
                                   : 'bg-gray-100 text-gray-800'
                               }`}>
-                                {project.settlementProgress}
-                              </span>
-                            </td>
-                            <td className="p-3">
-                              <span className={`px-2 py-1 text-xs rounded-full ${
-                                project.paymentStatus === '지급완료' 
-                                  ? 'bg-green-100 text-green-800'
-                                  : project.paymentStatus === '일시보류'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : project.paymentStatus === '선수금'
-                                  ? 'bg-blue-100 text-blue-800'
-                                  : 'bg-gray-100 text-gray-800'
-                              }`}>
-                                {project.paymentStatus}
+                                {manager.settlementProgress}
                               </span>
                             </td>
                             <td className="p-3 text-right font-mono text-sm text-green-600">
-                              {project.advancePaymentAmount !== 0 ? formatCurrency(project.advancePaymentAmount) : '-'}
+                              {manager.advancePaymentAmount !== 0 ? formatCurrency(manager.advancePaymentAmount) : '-'}
                             </td>
                             <td className="p-3 text-right font-mono text-sm text-blue-600">
-                              {project.prepaymentAmount !== 0 ? formatCurrency(project.prepaymentAmount) : '-'}
+                              {manager.prepaymentAmount !== 0 ? formatCurrency(manager.prepaymentAmount) : '-'}
                             </td>
                             <td className="p-3 text-right font-mono text-sm font-bold">
-                              {formatCurrency(project.totalAmount)}
+                              {formatCurrency(manager.totalAmount)}
                             </td>
-                            <td className="p-3 text-center text-sm">{project.currency}</td>
-                            <td className="p-3 text-center text-sm">{project.itemCount}</td>
+                            <td className="p-3 text-center text-sm">{manager.itemCount}</td>
                           </tr>
                         ))}
                         {/* 부서 소계 행 */}
                         <tr className="bg-gray-100 font-semibold">
-                          <td colSpan={4} className="p-3 text-right">
+                          <td colSpan={3} className="p-3 text-right">
                             <strong>{dept.department} 소계:</strong>
                           </td>
                           <td className="p-3 text-right font-mono text-green-600">
@@ -311,7 +302,6 @@ export default function ProjectAnalysisPage() {
                           <td className="p-3 text-right font-mono font-bold">
                             {formatCurrency(dept.totalAmount)}
                           </td>
-                          <td className="p-3 text-center">-</td>
                           <td className="p-3 text-center">{dept.itemCount}</td>
                         </tr>
                       </tbody>
@@ -330,11 +320,11 @@ export default function ProjectAnalysisPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
                 <p><strong>최대 금액 부서:</strong> {stats.topDepartmentByAmount}</p>
-                <p><strong>최대 금액 프로젝트:</strong> {stats.topProjectByAmount}</p>
+                <p><strong>최대 금액 담당자:</strong> {stats.topManagerByAmount}</p>
               </div>
               <div>
                 <p><strong>필터링된 부서 수:</strong> {filteredSummaries.length}/{stats.totalDepartments}</p>
-                <p><strong>필터링된 프로젝트 수:</strong> {filteredSummaries.reduce((sum, dept) => sum + dept.projectCount, 0)}</p>
+                <p><strong>필터링된 담당자 수:</strong> {filteredSummaries.reduce((sum, dept) => sum + dept.managerCount, 0)}</p>
               </div>
             </div>
           </Card>

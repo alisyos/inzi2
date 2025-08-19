@@ -6,7 +6,9 @@
       "Bash(npm run dev:*)",
       "Bash(npm run build:*)",
       "Bash(npx next:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(curl:*)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []

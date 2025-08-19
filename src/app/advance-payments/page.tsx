@@ -42,8 +42,8 @@ export default function AdvancePaymentsPage() {
 
   useEffect(() => {
     // 초기 데이터 로드 (실제 CSV 파일)
-    parseCSVData('');
-  }, [parseCSVData]);
+    loadCSVFromFile();
+  }, [loadCSVFromFile]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('ko-KR', {

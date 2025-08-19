@@ -45,6 +45,9 @@ export class CSVParser {
     // 불필요한 공백 제거
     cleaned = cleaned.trim();
     
+    // 깨진 문자 처리 (물음표로 대체된 문자 제거)
+    cleaned = cleaned.replace(/[�\?]+/g, '');
+    
     return cleaned;
   }
 
@@ -90,14 +93,39 @@ export class CSVParser {
   }
 
   static async parseCSVFile(csvContent: string): Promise<CSVParseResult> {
-    const lines = csvContent.split('\n');
+    const lines = csvContent.split(/\r?\n/);
     const data: AdvancePayment[] = [];
     const errors: string[] = [];
     let totalRows = 0;
     let parsedRows = 0;
 
-    // 헤더 라인 건너뛰기 (첫 3줄)
-    const dataLines = lines.slice(3).filter(line => line.trim().length > 0);
+    // 헤더를 찾아서 처리 (고유로 시작하거나 첫 번째 컬럼에 실제 데이터가 있는 행 찾기)
+    let headerIndex = -1;
+    for (let i = 0; i < Math.min(10, lines.length); i++) {
+      // 고유넘버, 고유?�버 등 다양한 인코딩 문제 대응
+      if (lines[i].includes('고유') || lines[i].includes('023-')) {
+        if (lines[i].includes('고유')) {
+          headerIndex = i;
+        } else {
+          // 실제 데이터가 시작되는 경우
+          headerIndex = i - 1;
+        }
+        break;
+      }
+    }
+    
+    if (headerIndex === -1) {
+      console.error('CSV 헤더를 찾을 수 없습니다. 처음 몇 줄:', lines.slice(0, 5));
+      return {
+        data: [],
+        errors: ['CSV 헤더를 찾을 수 없습니다.'],
+        totalRows: 0,
+        parsedRows: 0,
+      };
+    }
+
+    // 데이터 라인은 헤더 다음부터 시작
+    const dataLines = lines.slice(headerIndex + 1).filter(line => line.trim().length > 0);
     totalRows = dataLines.length;
 
     for (let i = 0; i < dataLines.length; i++) {
@@ -111,12 +139,12 @@ export class CSVParser {
         }
         
         // 빈 행이나 헤더 행 건너뛰기
-        if (columns[0].includes('고유넘버') || columns[0].includes('마감일')) {
+        if (columns[0].includes('고유') || columns[0].includes('마감') || columns[0] === '' || columns[0].includes('(')) {
           continue;
         }
 
         const payment: AdvancePayment = {
-          id: this.cleanValue(columns[0]) || `auto-${i}`,
+          id: this.cleanValue(columns[0]) || `auto-${Date.now()}-${i}`,
           electricKey: this.parseNumber(columns[1]) || 1,
           account: this.cleanValue(columns[2]) || '',
           glAccountName: this.cleanValue(columns[3]) || '',
@@ -156,7 +184,9 @@ export class CSVParser {
         parsedRows++;
         
       } catch (error) {
-        errors.push(`라인 ${i + 4}: ${error instanceof Error ? error.message : '파싱 오류'}`);
+        const errorMsg = `라인 ${i + headerIndex + 2}: ${error instanceof Error ? error.message : '파싱 오류'}`;
+        errors.push(errorMsg);
+        console.warn(errorMsg, '데이터:', columns.slice(0, 5));
       }
     }
 
@@ -176,10 +206,16 @@ export class CSVParser {
         throw new Error(`파일을 불러올 수 없습니다: ${response.statusText}`);
       }
       
-      const csvContent = await response.text();
+      // UTF-8 BOM 처리
+      let csvContent = await response.text();
+      if (csvContent.charCodeAt(0) === 0xFEFF) {
+        csvContent = csvContent.substring(1);
+      }
+      
       return this.parseCSVFile(csvContent);
       
     } catch (error) {
+      console.error('CSV 파일 로드 실패:', error);
       return {
         data: [],
         errors: [`파일 로드 오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}`],
