@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
-import { Dialog } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 interface AdvancedFiltersProps {
   open: boolean;
@@ -38,7 +38,8 @@ export function AdvancedFilters({ open, onClose }: AdvancedFiltersProps) {
 
   return (
     <Dialog open={open} onOpenChange={(open) => { if (!open) onClose() }}>
-      <Card className="p-6 max-w-2xl mx-auto">
+      <DialogContent className="max-w-2xl dialog-content-wrapper" style={{ backgroundColor: '#ffffff' }}>
+        <Card className="p-6" style={{ backgroundColor: '#ffffff' }}>
         <h2 className="text-xl font-bold mb-6">고급 필터</h2>
         
         <div className="space-y-6">
@@ -214,7 +215,8 @@ export function AdvancedFilters({ open, onClose }: AdvancedFiltersProps) {
             취소
           </Button>
         </div>
-      </Card>
+        </Card>
+      </DialogContent>
     </Dialog>
   );
 }

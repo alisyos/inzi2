@@ -12,7 +12,7 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@
 import { Card } from '@/components/ui/card';
 import { Table } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 export default function AdvancePaymentsPage() {
   const {
@@ -187,13 +187,22 @@ export default function AdvancePaymentsPage() {
               </Button>
             </div>
             <div className="flex gap-2">
-              <Button onClick={() => setShowStatsDialog(true)} variant="outline">
+              <Button onClick={() => {
+                console.log('통계 보기 버튼 클릭됨');
+                setShowStatsDialog(true);
+              }} variant="outline">
                 통계 보기
               </Button>
-              <Button onClick={() => setShowAutomationPanel(true)} variant="outline">
+              <Button onClick={() => {
+                console.log('자동화 분석 버튼 클릭됨');
+                setShowAutomationPanel(true);
+              }} variant="outline">
                 자동화 분석
               </Button>
-              <Button onClick={() => setShowAddDialog(true)}>
+              <Button onClick={() => {
+                console.log('새 항목 추가 버튼 클릭됨');
+                setShowAddDialog(true);
+              }}>
                 새 항목 추가
               </Button>
             </div>
@@ -315,70 +324,84 @@ export default function AdvancePaymentsPage() {
         </Card>
 
         {/* 추가 다이얼로그 */}
-        <Dialog open={showAddDialog} onOpenChange={(open) => { if (!open) closeDialogs() }}>
-          <AdvancePaymentForm
-            onClose={closeDialogs}
-            onSubmit={() => {
-              // 추가 완료 후 로직
-            }}
-          />
-        </Dialog>
+        {showAddDialog && (
+          <Dialog open={showAddDialog} onOpenChange={(open) => { if (!open) closeDialogs() }}>
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto dialog-content-wrapper" style={{ backgroundColor: '#ffffff' }}>
+              <AdvancePaymentForm
+                onClose={closeDialogs}
+                onSubmit={() => {
+                  // 추가 완료 후 로직
+                }}
+              />
+            </DialogContent>
+          </Dialog>
+        )}
 
         {/* 수정 다이얼로그 */}
-        <Dialog open={showEditDialog} onOpenChange={(open) => { if (!open) closeDialogs() }}>
-          {editingPayment && (
-            <AdvancePaymentForm
-              payment={editingPayment}
-              onClose={closeDialogs}
-              onSubmit={() => {
-                // 수정 완료 후 로직
-              }}
-            />
-          )}
-        </Dialog>
+        {showEditDialog && editingPayment && (
+          <Dialog open={showEditDialog} onOpenChange={(open) => { if (!open) closeDialogs() }}>
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto dialog-content-wrapper" style={{ backgroundColor: '#ffffff' }}>
+              <AdvancePaymentForm
+                payment={editingPayment}
+                onClose={closeDialogs}
+                onSubmit={() => {
+                  // 수정 완료 후 로직
+                }}
+              />
+            </DialogContent>
+          </Dialog>
+        )}
 
         {/* 고급 필터 다이얼로그 */}
-        <AdvancedFilters
-          open={showAdvancedFilters}
-          onClose={() => setShowAdvancedFilters(false)}
-        />
+        {showAdvancedFilters && (
+          <AdvancedFilters
+            open={showAdvancedFilters}
+            onClose={() => setShowAdvancedFilters(false)}
+          />
+        )}
 
         {/* 자동화 패널 다이얼로그 */}
-        <AutomationPanel
-          open={showAutomationPanel}
-          onClose={() => setShowAutomationPanel(false)}
-        />
+        {showAutomationPanel && (
+          <AutomationPanel
+            open={showAutomationPanel}
+            onClose={() => setShowAutomationPanel(false)}
+          />
+        )}
 
         {/* 통계 다이얼로그 */}
-        <Dialog open={showStatsDialog} onOpenChange={(open) => { if (!open) setShowStatsDialog(false) }}>
-          <div className="p-6">
-            <h2 className="text-xl font-bold mb-4">상세 통계</h2>
-            <div className="space-y-6">
-              <div>
-                <h3 className="font-semibold mb-2">부서별 통계</h3>
-                <div className="space-y-2">
-                  {Object.entries(stats.byDepartment).map(([dept, data]) => (
-                    <div key={dept} className="flex justify-between">
-                      <span>{dept}</span>
-                      <span>{data.count}건 / {formatCurrency(data.amount)}</span>
+        {showStatsDialog && (
+          <Dialog open={showStatsDialog} onOpenChange={(open) => { if (!open) setShowStatsDialog(false) }}>
+            <DialogContent className="max-w-2xl dialog-content-wrapper" style={{ backgroundColor: '#ffffff' }}>
+              <div className="p-6" style={{ backgroundColor: '#ffffff' }}>
+                <h2 className="text-xl font-bold mb-4">상세 통계</h2>
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="font-semibold mb-2">부서별 통계</h3>
+                    <div className="space-y-2">
+                      {Object.entries(stats.byDepartment).map(([dept, data]) => (
+                        <div key={dept} className="flex justify-between">
+                          <span>{dept}</span>
+                          <span>{data.count}건 / {formatCurrency(data.amount)}</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-2">상태별 통계</h3>
+                    <div className="space-y-2">
+                      {Object.entries(stats.byStatus).map(([status, data]) => (
+                        <div key={status} className="flex justify-between">
+                          <span>{status}</span>
+                          <span>{data.count}건 / {formatCurrency(data.amount)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div>
-                <h3 className="font-semibold mb-2">상태별 통계</h3>
-                <div className="space-y-2">
-                  {Object.entries(stats.byStatus).map(([status, data]) => (
-                    <div key={status} className="flex justify-between">
-                      <span>{status}</span>
-                      <span>{data.count}건 / {formatCurrency(data.amount)}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   );

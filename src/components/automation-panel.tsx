@@ -6,7 +6,7 @@ import { AdvancePayment } from '@/types/advance-payment';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Table } from '@/components/ui/table';
-import { Dialog } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 interface DuplicateGroup {
   key: string;
@@ -202,7 +202,8 @@ export function AutomationPanel({ open, onClose }: AutomationPanelProps) {
 
   return (
     <Dialog open={open} onOpenChange={(open) => { if (!open) onClose() }}>
-      <Card className="p-6 max-w-6xl mx-auto max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto dialog-content-wrapper" style={{ backgroundColor: '#ffffff' }}>
+        <Card className="p-6" style={{ backgroundColor: '#ffffff' }}>
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold">데이터 매칭 및 자동화 분석</h2>
           <Button onClick={runAnalysis} disabled={loading}>
@@ -375,7 +376,8 @@ export function AutomationPanel({ open, onClose }: AutomationPanelProps) {
             )}
           </div>
         ) : null}
-      </Card>
+        </Card>
+      </DialogContent>
     </Dialog>
   );
 }

@@ -186,7 +186,7 @@ export class CSVParser {
       } catch (error) {
         const errorMsg = `라인 ${i + headerIndex + 2}: ${error instanceof Error ? error.message : '파싱 오류'}`;
         errors.push(errorMsg);
-        console.warn(errorMsg, '데이터:', columns.slice(0, 5));
+        console.warn(errorMsg);
       }
     }
 

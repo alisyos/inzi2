@@ -25,13 +25,124 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0f0f23;
+  --card: #ffffff;
+  --card-foreground: #0f0f23;
+  --popover: #ffffff;
+  --popover-foreground: #0f0f23;
+  --primary: #1a1625;
+  --primary-foreground: #fafafa;
+  --secondary: #f5f5f5;
+  --secondary-foreground: #1a1a1a;
+  --muted: #f5f5f5;
+  --muted-foreground: #6b7280;
+  --accent: #f5f5f5;
+  --accent-foreground: #1a1a1a;
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: #1a1a1a;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: #0f0f23;
+  --foreground: #fafafa;
+  --card: #0f0f23;
+  --card-foreground: #fafafa;
+  --popover: #0f0f23;
+  --popover-foreground: #fafafa;
+  --primary: #fafafa;
+  --primary-foreground: #1a1a1a;
+  --secondary: #262626;
+  --secondary-foreground: #fafafa;
+  --muted: #262626;
+  --muted-foreground: #a3a3a3;
+  --accent: #262626;
+  --accent-foreground: #fafafa;
+  --destructive: #dc2626;
+  --destructive-foreground: #fafafa;
+  --border: #262626;
+  --input: #262626;
+  --ring: #d4d4d8;
+}
+
+* {
+  border-color: var(--border);
 }
 
 body {
+  background-color: var(--background);
   color: var(--foreground);
-  background: var(--background);
   font-family: 'Pretendard';
+}
+
+/* Dialog/Modal 스타일링 강화 */
+[data-radix-popper-content-wrapper] {
+  z-index: 50 !important;
+}
+
+/* Dialog Overlay 강화 */
+[data-radix-dialog-overlay] {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+  backdrop-filter: blur(4px) !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 50 !important;
+}
+
+/* Dialog Content 배경 강화 */
+[data-radix-dialog-content] {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  border-radius: 8px !important;
+  position: fixed !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 51 !important;
+  padding: 24px !important;
+}
+
+/* Select/Dropdown 배경 강화 */
+[data-radix-select-content] {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  border-radius: 6px !important;
+  z-index: 50 !important;
+}
+
+[data-radix-select-item] {
+  background-color: transparent !important;
+}
+
+[data-radix-select-item]:hover,
+[data-radix-select-item][data-highlighted] {
+  background-color: #f3f4f6 !important;
+}
+
+/* Popover 배경 강화 */
+[data-radix-popover-content] {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  border-radius: 6px !important;
+  z-index: 50 !important;
+}
+
+/* 모든 Dialog 내부 요소도 배경 보장 */
+.dialog-content-wrapper {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border-radius: 8px !important;
+  padding: 24px !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
 }
 
 @layer utilities {
